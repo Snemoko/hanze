@@ -21,8 +21,8 @@ return new class extends Migration
 
 
             $table->text("report");
-            $table->date('appointment_date');
-            $table->time('appointment_time');
+            $table->date('appointment_date')->nullable();
+            $table->time('appointment_time')->nullable();
 
             $table->timestamps();
 
