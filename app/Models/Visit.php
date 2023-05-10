@@ -41,11 +41,35 @@ class Visit extends Model
     }
 
     /**
+     * returns visits based on given user_id
+     *
+     * @param integer $id
+     */
+    public function scopeWhereUserId($query, $id){
+        return $query
+            ->where("user_id", $id);
+    }
+
+    /**
      *
      * Returns visits that are in the future
      */
     public function scopeWhereInFuture($query){
         return $query
             ->where("appointment_date", ">", Carbon::now()->format("Y-m-d"));
+    }
+
+    /**
+     *
+     * Returns specific information about the visits
+     */
+    public function scopeRetrieveInfo($query){
+        return $query
+            ->selectRaw("visits.id, visits.user_id, visits.customer_id, customers.name, visits.appointment_date, CHAR_LENGTH(visits.report) AS report_char_count");
+    }
+
+    public function scopeJoinCustomer($query){
+        return $query
+            ->join("customers", "visits.customer_id", "customers.id");
     }
 }
