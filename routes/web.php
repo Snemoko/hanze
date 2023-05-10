@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VisitController;
+use App\Models\Visit;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,5 +26,13 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 // Users need to be registered to view these routes
 Route::group(['middleware' => 'auth'], function(){
+
+    // Visits
     Route::get("/visits", [VisitController::class, 'index'])->name('visit-list');
+    Route::get('visit/{visit}', [VisitController::class, 'retrieveVisit'])->name('visit-info');
+    Route::post('visit/{visit}', [VisitController::class, 'update'])->name('visit-update');
+
+    // Users
+    Route::get('user/{user}', [UserController::class, 'retrieveUser'])->name('user-info');
+
 });
