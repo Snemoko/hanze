@@ -65,7 +65,7 @@ class VisitController extends Controller
         $visit->save();
 
         return response()->json([
-            "success", "succesfully changed the visit with ID " . $visit->id,
+            "success" => "succesfully changed the visit with ID " . $visit->id,
         ]);
     }
 }

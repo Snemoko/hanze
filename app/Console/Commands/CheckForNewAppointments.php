@@ -28,36 +28,29 @@ class CheckForNewAppointments extends Command
      *
      * @return int
      */
-    public function handle()
-    {
-        // INFORMATION:
+    public function handle(){
+        $customers = Customer::with(['visits' => function($query){
+            $query->orderBy('appointment_date', 'desc');
+        }])->get()->each(function ($customer){
+            // Retrieve the latest visit
+            $lastVisit = $customer->visits->first();
 
-        // process moet dagelijks lopen (doen we in de kernel.php file)
-        // Kijkt of er een customer is die geen afspraak heeft in de toekomst
-        // Kijkt ook of de customer zijn laatste afspraak minimaal 5 maand geleden is, dit moet een optie zijn en niet hard coded (variabele in de command)
-        $customers = Customer::get();
-        foreach($customers as $customer){
-            $Newvisit = $customer->visits()->whereInFuture()->first();
-            // continue if the customer already has an appointment planned in the future
-            if($Newvisit !== null){
-                continue;
-            }
-
-            // This also retrieves visits with null appointment date, this is neccesary for appointments that are not schedulded but already planned
-            $lastVisit = $customer->visits()->OrderBy('appointment_date', 'desc')->first();
-            // Customer has no visits yet
+            // a visit is not yet created
             if($lastVisit === null){
                 $this->createNewAppointment($customer);
-                continue;
+                return true;
             }
 
             $lastVisitDate = new Carbon($lastVisit->appointment_date);
             // Last appointment for customer is longer than .. months ago
             if($lastVisitDate->diffInMonths() > $this->argument('months')){
                 $this->createNewAppointment($customer);
-                continue;
+                return true;
             }
-        }
+            return true;
+        });
+
+        // Command succesfully run
         return Command::SUCCESS;
     }
 
@@ -67,5 +60,6 @@ class CheckForNewAppointments extends Command
         $visit->report = "your automatic " .$this->argument('months') . " months checkup";
         #appointment date & time are nullable so we keep them null, maybe the customer cannot check in at the given time/date, thats why the admin has to update the visit.
         $visit->save();
+        echo "Created an appointment for customer " . $customer->name . "\n";
     }
 }
